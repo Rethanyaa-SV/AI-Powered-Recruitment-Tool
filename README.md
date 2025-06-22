@@ -6,6 +6,8 @@ A streamlined web application that helps recruiters manage job postings and eval
 
 🌐 **[Live Project](https://ai-powered-recruitment-tool-tylm.vercel.app/)**  
 
+📁 **[Directory hierarchy](https://drive.google.com/file/d/13sd1JHTfMYVRgnH8tS85klCfwnWd9930/view?usp=sharing)** 
+
 ## Features
 
 ### 🔐 Authentication
