@@ -1,53 +1,60 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MapPin, Clock, DollarSign, Search, Filter, Star } from "lucide-react"
-import { ProtectedRoute } from "@/components/protected-route"
-import { AdaptiveNavbar } from "@/components/adaptive-navbar"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MapPin, Clock, DollarSign, Search, Filter, Star } from "lucide-react";
+import { ProtectedRoute } from "@/components/protected-route";
+import { AdaptiveNavbar } from "@/components/adaptive-navbar";
+import Link from "next/link";
 
 export default function CandidateJobsPage() {
-  const [jobs, setJobs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [locationFilter, setLocationFilter] = useState("all")
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("match")
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("match");
 
   useEffect(() => {
-    fetchJobs()
-  }, [])
+    fetchJobs();
+  }, []);
 
   const fetchJobs = async () => {
     try {
-      const token = localStorage.getItem("auth-token")
-      const response = await fetch("/api/candidate/jobs", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await fetch("/api/candidate/jobs");
 
       if (response.ok) {
-        const data = await response.json()
-        setJobs(data)
+        const data = await response.json();
+        setJobs(data);
       }
     } catch (error) {
-      console.error("Error fetching jobs:", error)
+      console.error("Error fetching jobs:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getScoreColor = (score) => {
-    if (score >= 80) return "bg-green-100 text-green-800"
-    if (score >= 60) return "bg-yellow-100 text-yellow-800"
-    return "bg-red-100 text-red-800"
-  }
+    if (score >= 80) return "bg-green-100 text-green-800";
+    if (score >= 60) return "bg-yellow-100 text-yellow-800";
+    return "bg-red-100 text-red-800";
+  };
 
   const filteredAndSortedJobs = jobs
     .filter((job) => {
@@ -55,26 +62,27 @@ export default function CandidateJobsPage() {
         !searchTerm ||
         job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.description.toLowerCase().includes(searchTerm.toLowerCase())
+        job.description.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesLocation =
-        locationFilter === "all" || job.location.toLowerCase().includes(locationFilter.toLowerCase())
-      const matchesType = typeFilter === "all" || job.type === typeFilter
+        locationFilter === "all" ||
+        job.location.toLowerCase().includes(locationFilter.toLowerCase());
+      const matchesType = typeFilter === "all" || job.type === typeFilter;
 
-      return matchesSearch && matchesLocation && matchesType
+      return matchesSearch && matchesLocation && matchesType;
     })
     .sort((a, b) => {
       switch (sortBy) {
         case "match":
-          return (b.matchScore || 0) - (a.matchScore || 0)
+          return (b.matchScore || 0) - (a.matchScore || 0);
         case "date":
-          return new Date(b.createdAt) - new Date(a.createdAt)
+          return new Date(b.createdAt) - new Date(a.createdAt);
         case "title":
-          return a.title.localeCompare(b.title)
+          return a.title.localeCompare(b.title);
         default:
-          return 0
+          return 0;
       }
-    })
+    });
 
   if (loading) {
     return (
@@ -95,7 +103,7 @@ export default function CandidateJobsPage() {
           </div>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
   return (
@@ -104,8 +112,12 @@ export default function CandidateJobsPage() {
         <AdaptiveNavbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Browse Jobs</h1>
-            <p className="text-gray-600">Discover opportunities that match your skills and experience</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Browse Jobs
+            </h1>
+            <p className="text-gray-600">
+              Discover opportunities that match your skills and experience
+            </p>
           </div>
 
           {/* Filters */}
@@ -171,7 +183,11 @@ export default function CandidateJobsPage() {
                       <div className="flex items-center gap-3 mb-2">
                         <CardTitle className="text-xl">{job.title}</CardTitle>
                         {job.matchScore && (
-                          <Badge className={`${getScoreColor(job.matchScore)} font-semibold flex items-center gap-1`}>
+                          <Badge
+                            className={`${getScoreColor(
+                              job.matchScore
+                            )} font-semibold flex items-center gap-1`}
+                          >
                             <Star className="h-3 w-3" />
                             {job.matchScore}% Match
                           </Badge>
@@ -203,14 +219,22 @@ export default function CandidateJobsPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 mb-4 line-clamp-3">{job.description}</p>
+                  <p className="text-gray-700 mb-4 line-clamp-3">
+                    {job.description}
+                  </p>
 
                   {job.skills && job.skills.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-sm font-medium text-gray-900 mb-2">Required Skills:</p>
+                      <p className="text-sm font-medium text-gray-900 mb-2">
+                        Required Skills:
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {job.skills.slice(0, 6).map((skill, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-xs"
+                          >
                             {skill}
                           </Badge>
                         ))}
@@ -224,7 +248,9 @@ export default function CandidateJobsPage() {
                   )}
 
                   <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
+                    <span>
+                      Posted {new Date(job.createdAt).toLocaleDateString()}
+                    </span>
                     <Link href={`/candidate/jobs/${job.id}`}>
                       <Button variant="outline" size="sm">
                         Apply Now
@@ -239,7 +265,12 @@ export default function CandidateJobsPage() {
               <Card>
                 <CardContent className="text-center py-12">
                   <div className="text-gray-400 mb-4">
-                    <svg className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="h-12 w-12 mx-auto"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -248,15 +279,18 @@ export default function CandidateJobsPage() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No jobs found
+                  </h3>
                   <p className="text-gray-600 mb-4">
-                    Try adjusting your search criteria or check back later for new opportunities.
+                    Try adjusting your search criteria or check back later for
+                    new opportunities.
                   </p>
                   <Button
                     onClick={() => {
-                      setSearchTerm("")
-                      setLocationFilter("all")
-                      setTypeFilter("all")
+                      setSearchTerm("");
+                      setLocationFilter("all");
+                      setTypeFilter("all");
                     }}
                   >
                     Clear Filters
@@ -268,5 +302,5 @@ export default function CandidateJobsPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

@@ -1,37 +1,40 @@
-import { NextResponse } from "next/server"
-import { generateText } from "ai"
-import { google } from "@ai-sdk/google"
-import jwt from "jsonwebtoken"
+import { NextResponse } from "next/server";
+import { generateText } from "ai";
+import { google } from "@ai-sdk/google";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-function verifyToken(request) {
-  const authHeader = request.headers.get("authorization")
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null
-  }
-
+async function verifyToken(request) {
   try {
-    const token = authHeader.substring(7)
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key")
-    return decoded
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return null;
+    }
+    return session.user;
   } catch (error) {
-    return null
+    return null;
   }
 }
 
 export async function POST(request) {
-  const user = verifyToken(request)
+  const user = await verifyToken(request);
   if (!user) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const { resumeText } = await request.json()
-
+    const { resumeText } = await request.json();
+    console.log(resumeText);
     if (!resumeText) {
-      return NextResponse.json({ message: "Resume text is required" }, { status: 400 })
+      return NextResponse.json(
+        { message: "Resume text is required" },
+        { status: 400 }
+      );
     }
 
-    const { text } = await generateText({
+    console.log(resumeText);
+
+    const generated = await generateText({
       model: google("gemini-1.5-flash"),
       prompt: `You are an expert resume parser. Analyze the following resume text and extract structured information.
 
@@ -68,17 +71,21 @@ Please extract and return the information in the following JSON format:
 }
 
 Be thorough and accurate. If information is not available, use null or empty arrays. Return only valid JSON.`,
-    })
+    });
 
-    const cleanedText = text.replace(/```json|```/g, "").trim()
-    const parsedData = JSON.parse(cleanedText)
+    console.log(generated);
+
+    const { text } = generated;
+
+    const cleanedText = text.replace(/```json|```/g, "").trim();
+    const parsedData = JSON.parse(cleanedText);
 
     return NextResponse.json({
       success: true,
       data: parsedData,
-    })
+    });
   } catch (error) {
-    console.error("Resume analysis error:", error)
+    console.error("Resume analysis error:", error);
 
     // Fallback parsing logic
     const fallbackData = {
@@ -94,12 +101,13 @@ Be thorough and accurate. If information is not available, use null or empty arr
       experienceSummary: "Unable to parse resume automatically",
       yearsOfExperience: 0,
       seniorityLevel: "Unknown",
-    }
+    };
 
     return NextResponse.json({
       success: true,
       data: fallbackData,
-      warning: "Resume parsed with limited accuracy. Please review and edit the information.",
-    })
+      warning:
+        "Resume parsed with limited accuracy. Please review and edit the information.",
+    });
   }
 }

@@ -1,27 +1,47 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Edit, Trash2, MapPin, Clock, DollarSign, Users } from "lucide-react"
-import { useAuth } from "@/components/auth-provider"
-import { AdaptiveNavbar } from "@/components/adaptive-navbar"
-import { ProtectedRoute } from "@/components/protected-route"
-import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  MapPin,
+  Clock,
+  DollarSign,
+  Users,
+} from "lucide-react";
+import { useAuth } from "@/components/auth-provider";
+import { AdaptiveNavbar } from "@/components/adaptive-navbar";
+import { ProtectedRoute } from "@/components/protected-route";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function RecruiterJobsPage() {
-  const { user } = useAuth()
-  const { toast } = useToast()
-  const [jobs, setJobs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [editingJob, setEditingJob] = useState(null)
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingJob, setEditingJob] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -30,97 +50,94 @@ export default function RecruiterJobsPage() {
     type: "Full-time",
     salary: "",
     skills: "",
-  })
+  });
 
   useEffect(() => {
-    fetchJobs()
-  }, [])
+    fetchJobs();
+  }, []);
 
   const fetchJobs = async () => {
     try {
-      const token = localStorage.getItem("auth-token")
-      const response = await fetch("/api/recruiter/jobs", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
+      const response = await fetch("/api/recruiter/jobs");
       if (response.ok) {
-        const data = await response.json()
-        setJobs(data)
+        const data = await response.json();
+        console.log("Fetched jobs:", data);
+        setJobs(data);
       }
     } catch (error) {
-      console.error("Error fetching jobs:", error)
+      console.error("Error fetching jobs:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
-      const token = localStorage.getItem("auth-token")
       const skillsArray = formData.skills
         .split(",")
         .map((s) => s.trim())
-        .filter((s) => s)
+        .filter((s) => s);
 
       const jobData = {
         ...formData,
         skills: skillsArray,
-      }
+      };
 
-      const url = editingJob ? `/api/recruiter/jobs/${editingJob.id}` : "/api/recruiter/jobs"
-      const method = editingJob ? "PUT" : "POST"
+      const url = editingJob
+        ? `/api/recruiter/jobs/${editingJob.id}`
+        : "/api/recruiter/jobs";
+      const method = editingJob ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(jobData),
-      })
+      });
 
       if (response.ok) {
-        const savedJob = await response.json()
+        const savedJob = await response.json();
 
         if (editingJob) {
-          setJobs(jobs.map((job) => (job.id === editingJob.id ? savedJob : job)))
+          setJobs(
+            jobs.map((job) => (job.id === editingJob.id ? savedJob : job))
+          );
           toast({
             title: "Job Updated",
             description: "Job posting has been updated successfully.",
-          })
+          });
         } else {
-          setJobs([savedJob, ...jobs])
+          setJobs([savedJob, ...jobs]);
           toast({
             title: "Job Created",
             description: "New job posting has been created successfully.",
-          })
+          });
         }
 
-        resetForm()
+        resetForm();
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast({
           title: "Error",
           description: error.message || "Failed to save job posting.",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error saving job:", error)
+      console.error("Error saving job:", error);
       toast({
         title: "Error",
         description: "Failed to save job posting.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleEdit = (job) => {
-    setEditingJob(job)
+    setEditingJob(job);
     setFormData({
       title: job.title,
       description: job.description,
@@ -129,44 +146,40 @@ export default function RecruiterJobsPage() {
       type: job.type,
       salary: job.salary || "",
       skills: job.skills ? job.skills.join(", ") : "",
-    })
-    setShowCreateForm(true)
-  }
+    });
+    setShowCreateForm(true);
+  };
 
   const handleDelete = async (jobId) => {
-    if (!confirm("Are you sure you want to delete this job posting?")) return
+    if (!confirm("Are you sure you want to delete this job posting?")) return;
 
     try {
-      const token = localStorage.getItem("auth-token")
       const response = await fetch(`/api/recruiter/jobs/${jobId}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      });
 
       if (response.ok) {
-        setJobs(jobs.filter((job) => job.id !== jobId))
+        setJobs(jobs.filter((job) => job.id !== jobId));
         toast({
           title: "Job Deleted",
           description: "Job posting has been deleted successfully.",
-        })
+        });
       } else {
         toast({
           title: "Error",
           description: "Failed to delete job posting.",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error deleting job:", error)
+      console.error("Error deleting job:", error);
       toast({
         title: "Error",
         description: "Failed to delete job posting.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -177,10 +190,10 @@ export default function RecruiterJobsPage() {
       type: "Full-time",
       salary: "",
       skills: "",
-    })
-    setEditingJob(null)
-    setShowCreateForm(false)
-  }
+    });
+    setEditingJob(null);
+    setShowCreateForm(false);
+  };
 
   if (loading) {
     return (
@@ -201,7 +214,7 @@ export default function RecruiterJobsPage() {
           </div>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
   return (
@@ -211,10 +224,17 @@ export default function RecruiterJobsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8 flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Job Postings</h1>
-              <p className="text-gray-600">Manage your job postings and track applications</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Job Postings
+              </h1>
+              <p className="text-gray-600">
+                Manage your job postings and track applications
+              </p>
             </div>
-            <Button onClick={() => setShowCreateForm(true)} className="flex items-center gap-2">
+            <Button
+              onClick={() => setShowCreateForm(true)}
+              className="flex items-center gap-2"
+            >
               <Plus className="h-4 w-4" />
               Post New Job
             </Button>
@@ -224,9 +244,13 @@ export default function RecruiterJobsPage() {
           <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>{editingJob ? "Edit Job Posting" : "Create New Job Posting"}</DialogTitle>
+                <DialogTitle>
+                  {editingJob ? "Edit Job Posting" : "Create New Job Posting"}
+                </DialogTitle>
                 <DialogDescription>
-                  {editingJob ? "Update the job posting details" : "Fill in the details for your new job posting"}
+                  {editingJob
+                    ? "Update the job posting details"
+                    : "Fill in the details for your new job posting"}
                 </DialogDescription>
               </DialogHeader>
 
@@ -236,7 +260,9 @@ export default function RecruiterJobsPage() {
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     placeholder="e.g., Senior Frontend Developer"
                     required
                   />
@@ -248,14 +274,21 @@ export default function RecruiterJobsPage() {
                     <Input
                       id="location"
                       value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, location: e.target.value })
+                      }
                       placeholder="e.g., San Francisco, CA"
                       required
                     />
                   </div>
                   <div>
                     <Label htmlFor="type">Job Type *</Label>
-                    <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+                    <Select
+                      value={formData.type}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, type: value })
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -274,7 +307,9 @@ export default function RecruiterJobsPage() {
                   <Input
                     id="salary"
                     value={formData.salary}
-                    onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, salary: e.target.value })
+                    }
                     placeholder="e.g., $80,000 - $120,000"
                   />
                 </div>
@@ -284,11 +319,15 @@ export default function RecruiterJobsPage() {
                   <Input
                     id="skills"
                     value={formData.skills}
-                    onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, skills: e.target.value })
+                    }
                     placeholder="e.g., React, JavaScript, Node.js (comma-separated)"
                     required
                   />
-                  <p className="text-sm text-gray-500 mt-1">Separate skills with commas</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Separate skills with commas
+                  </p>
                 </div>
 
                 <div>
@@ -296,7 +335,9 @@ export default function RecruiterJobsPage() {
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     placeholder="Describe the role, responsibilities, and what you're looking for..."
                     rows={6}
                     required
@@ -308,7 +349,9 @@ export default function RecruiterJobsPage() {
                   <Textarea
                     id="requirements"
                     value={formData.requirements}
-                    onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, requirements: e.target.value })
+                    }
                     placeholder="List the specific requirements, qualifications, and experience needed..."
                     rows={4}
                   />
@@ -328,91 +371,113 @@ export default function RecruiterJobsPage() {
 
           {/* Jobs List */}
           <div className="space-y-4">
-            {jobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl mb-1">{job.title}</CardTitle>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {job.location}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {job.type}
-                        </div>
-                        {job.salary && (
+            {jobs && jobs.length > 0 ? (
+              jobs.map((job) => (
+                <Card
+                  key={job.id}
+                  className="hover:shadow-md transition-shadow"
+                >
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl mb-1">
+                          {job.title}
+                        </CardTitle>
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
                           <div className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" />
-                            {job.salary}
+                            <MapPin className="h-4 w-4" />
+                            {job.location}
                           </div>
-                        )}
-                        <div className="flex items-center gap-1">
-                          <Users className="h-4 w-4" />
-                          {job.applicationsCount || 0} applications
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            {job.type}
+                          </div>
+                          {job.salary && (
+                            <div className="flex items-center gap-1">
+                              <DollarSign className="h-4 w-4" />
+                              {job.salary}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            {job.applicationsCount || 0} applications
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        className={
-                          job.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                        }
-                      >
-                        {job.status}
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(job)}
-                        className="flex items-center gap-1"
-                      >
-                        <Edit className="h-3 w-3" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(job.id)}
-                        className="flex items-center gap-1 text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 mb-4 line-clamp-3">{job.description}</p>
-
-                  {job.skills && job.skills.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-sm font-medium text-gray-900 mb-2">Required Skills:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {job.skills.map((skill, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {skill}
-                          </Badge>
-                        ))}
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          className={
+                            job.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }
+                        >
+                          {job.status}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(job)}
+                          className="flex items-center gap-1"
+                        >
+                          <Edit className="h-3 w-3" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(job.id)}
+                          className="flex items-center gap-1 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Delete
+                        </Button>
                       </div>
                     </div>
-                  )}
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 mb-4 line-clamp-3">
+                      {job.description}
+                    </p>
 
-                  <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
-                    <span>Job ID: {job.id}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                    {job.skills && job.skills.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-sm font-medium text-gray-900 mb-2">
+                          Required Skills:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {job.skills.map((skill, index) => (
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-            {jobs.length === 0 && (
+                    <div className="flex justify-between items-center text-sm text-gray-500">
+                      <span>
+                        Posted {new Date(job.createdAt).toLocaleDateString()}
+                      </span>
+                      <span>Job ID: {job.id}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
               <Card>
                 <CardContent className="text-center py-12">
                   <div className="text-gray-400 mb-4">
-                    <svg className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="h-12 w-12 mx-auto"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -421,9 +486,12 @@ export default function RecruiterJobsPage() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No job postings yet</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No job postings yet
+                  </h3>
                   <p className="text-gray-600 mb-4">
-                    Create your first job posting to start receiving applications from qualified candidates.
+                    Create your first job posting to start receiving
+                    applications from qualified candidates.
                   </p>
                   <Button onClick={() => setShowCreateForm(true)}>
                     <Plus className="h-4 w-4 mr-2" />
@@ -436,5 +504,5 @@ export default function RecruiterJobsPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { useAuth } from "@/components/auth-provider"
-import { AdaptiveNavbar } from "@/components/adaptive-navbar"
-import { ProtectedRoute } from "@/components/protected-route"
-import { ResumeUpload } from "@/components/resume-upload"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth-provider";
+import { AdaptiveNavbar } from "@/components/adaptive-navbar";
+import { ProtectedRoute } from "@/components/protected-route";
+import { ResumeUpload } from "@/components/resume-upload";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 import {
   MapPin,
   Clock,
@@ -26,75 +26,79 @@ import {
   Send,
   Target,
   TrendingUp,
-} from "lucide-react"
+} from "lucide-react";
 
 export default function JobDetailsPage() {
-  const params = useParams()
-  const router = useRouter()
-  const { user } = useAuth()
-  const { toast } = useToast()
-  const [job, setJob] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [applying, setApplying] = useState(false)
-  const [hasApplied, setHasApplied] = useState(false)
-  const [coverLetter, setCoverLetter] = useState("")
-  const [resumeData, setResumeData] = useState(null)
-  const [showApplicationForm, setShowApplicationForm] = useState(false)
+  const params = useParams();
+  const router = useRouter();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [coverLetter, setCoverLetter] = useState("");
+  const [resumeData, setResumeData] = useState(null);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
 
   useEffect(() => {
-    fetchJobDetails()
-    checkApplicationStatus()
-  }, [params.id])
+    fetchJobDetails();
+    checkApplicationStatus();
+  }, [params.id]);
 
   const fetchJobDetails = async () => {
     try {
-      const token = localStorage.getItem("auth-token")
+      const token = localStorage.getItem("auth-token");
       const response = await fetch(`/api/candidate/jobs/${params.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setJob(data)
+        const data = await response.json();
+        console.log(data);
+        setJob(data);
       } else {
         toast({
           title: "Error",
           description: "Job not found",
           variant: "destructive",
-        })
-        router.push("/candidate/jobs")
+        });
+        router.push("/candidate/jobs");
       }
     } catch (error) {
-      console.error("Error fetching job:", error)
+      console.error("Error fetching job:", error);
       toast({
         title: "Error",
         description: "Failed to load job details",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const checkApplicationStatus = async () => {
     try {
-      const token = localStorage.getItem("auth-token")
-      const response = await fetch(`/api/candidate/applications/check/${params.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const token = localStorage.getItem("auth-token");
+      const response = await fetch(
+        `/api/candidate/applications/check/${params.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
-        const data = await response.json()
-        setHasApplied(data.hasApplied)
+        const data = await response.json();
+        setHasApplied(data.hasApplied);
       }
     } catch (error) {
-      console.error("Error checking application status:", error)
+      console.error("Error checking application status:", error);
     }
-  }
+  };
 
   const handleApply = async () => {
     if (!resumeData) {
@@ -102,13 +106,13 @@ export default function JobDetailsPage() {
         title: "Resume Required",
         description: "Please upload your resume before applying",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setApplying(true)
+    setApplying(true);
     try {
-      const token = localStorage.getItem("auth-token")
+      const token = localStorage.getItem("auth-token");
       const response = await fetch("/api/candidate/applications", {
         method: "POST",
         headers: {
@@ -120,67 +124,67 @@ export default function JobDetailsPage() {
           coverLetter,
           resumeData,
         }),
-      })
+      });
 
       if (response.ok) {
-        setHasApplied(true)
-        setShowApplicationForm(false)
+        setHasApplied(true);
+        setShowApplicationForm(false);
         toast({
           title: "Application Submitted",
           description: "Your application has been submitted successfully!",
-        })
+        });
       } else {
-        const error = await response.json()
+        const error = await response.json();
         toast({
           title: "Application Failed",
           description: error.message || "Failed to submit application",
           variant: "destructive",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error submitting application:", error)
+      console.error("Error submitting application:", error);
       toast({
         title: "Error",
         description: "Failed to submit application",
         variant: "destructive",
-      })
+      });
     } finally {
-      setApplying(false)
+      setApplying(false);
     }
-  }
+  };
 
   const getScoreColor = (score) => {
-    if (score >= 80) return "bg-green-100 text-green-800 border-green-200"
-    if (score >= 60) return "bg-yellow-100 text-yellow-800 border-yellow-200"
-    return "bg-red-100 text-red-800 border-red-200"
-  }
+    if (score >= 80) return "bg-green-100 text-green-800 border-green-200";
+    if (score >= 60) return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    return "bg-red-100 text-red-800 border-red-200";
+  };
 
   const formatSalary = (salary) => {
-    if (!salary) return "Salary not specified"
+    if (!salary) return "Salary not specified";
     if (typeof salary === "object") {
-      const { min, max, currency = "USD" } = salary
+      const { min, max, currency = "USD" } = salary;
       if (min && max) {
-        return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`
+        return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
       }
-      return `${currency} ${(min || max).toLocaleString()}`
+      return `${currency} ${(min || max).toLocaleString()}`;
     }
-    return salary
-  }
+    return salary;
+  };
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   if (loading) {
     return (
       <ProtectedRoute allowedRoles={["candidate"]}>
         <div className="min-h-screen bg-gray-50">
           <AdaptiveNavbar />
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="animate-pulse space-y-6">
               <div className="flex items-center space-x-4">
                 <div className="h-8 w-8 bg-gray-200 rounded"></div>
@@ -204,7 +208,7 @@ export default function JobDetailsPage() {
           </div>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
   if (!job) {
@@ -212,11 +216,18 @@ export default function JobDetailsPage() {
       <ProtectedRoute allowedRoles={["candidate"]}>
         <div className="min-h-screen bg-gray-50">
           <AdaptiveNavbar />
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900">Job not found</h1>
-              <p className="text-gray-600 mt-2">The job you're looking for doesn't exist or has been removed.</p>
-              <Button onClick={() => router.push("/candidate/jobs")} className="mt-4">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Job not found
+              </h1>
+              <p className="text-gray-600 mt-2">
+                The job you're looking for doesn't exist or has been removed.
+              </p>
+              <Button
+                onClick={() => router.push("/candidate/jobs")}
+                className="mt-4"
+              >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Jobs
               </Button>
@@ -224,14 +235,14 @@ export default function JobDetailsPage() {
           </div>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
   return (
     <ProtectedRoute allowedRoles={["candidate"]}>
       <div className="min-h-screen bg-gray-50">
         <AdaptiveNavbar />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back Button */}
           <Button
             variant="ghost"
@@ -250,7 +261,9 @@ export default function JobDetailsPage() {
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1">
-                      <CardTitle className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">{job.title}</CardTitle>
+                      <CardTitle className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+                        {job.title}
+                      </CardTitle>
                       <div className="flex flex-wrap items-center gap-4 text-gray-600">
                         <div className="flex items-center gap-1">
                           <Building className="h-4 w-4" />
@@ -267,10 +280,16 @@ export default function JobDetailsPage() {
                       </div>
                     </div>
                     {job.matchScore && (
-                      <div className={`px-3 py-2 rounded-lg border ${getScoreColor(job.matchScore)}`}>
+                      <div
+                        className={`px-3 py-2 rounded-lg border ${getScoreColor(
+                          job.matchScore
+                        )}`}
+                      >
                         <div className="flex items-center gap-2">
                           <Target className="h-4 w-4" />
-                          <span className="font-semibold">{job.matchScore}% Match</span>
+                          <span className="font-semibold">
+                            {job.matchScore}% Match
+                          </span>
                         </div>
                       </div>
                     )}
@@ -282,28 +301,36 @@ export default function JobDetailsPage() {
                       <DollarSign className="h-5 w-5 text-green-600" />
                       <div>
                         <p className="text-sm text-gray-600">Salary</p>
-                        <p className="font-semibold">{formatSalary(job.salary)}</p>
+                        <p className="font-semibold">
+                          {formatSalary(job.salary)}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                       <Calendar className="h-5 w-5 text-blue-600" />
                       <div>
                         <p className="text-sm text-gray-600">Posted</p>
-                        <p className="font-semibold">{formatDate(job.createdAt)}</p>
+                        <p className="font-semibold">
+                          {formatDate(job.createdAt)}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                       <Users className="h-5 w-5 text-purple-600" />
                       <div>
                         <p className="text-sm text-gray-600">Applications</p>
-                        <p className="font-semibold">{job.applicationsCount || 0}</p>
+                        <p className="font-semibold">
+                          {job.applicationsCount || 0}
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Job Description */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Job Description</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Job Description
+                    </h3>
                     <div className="prose prose-sm max-w-none text-gray-700">
                       <p className="whitespace-pre-wrap">{job.description}</p>
                     </div>
@@ -313,7 +340,9 @@ export default function JobDetailsPage() {
 
                   {/* Requirements */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-900">Requirements</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Requirements
+                    </h3>
                     <div className="prose prose-sm max-w-none text-gray-700">
                       <p className="whitespace-pre-wrap">{job.requirements}</p>
                     </div>
@@ -324,10 +353,16 @@ export default function JobDetailsPage() {
                   {/* Skills */}
                   {job.skills && job.skills.length > 0 && (
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Required Skills</h3>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Required Skills
+                      </h3>
                       <div className="flex flex-wrap gap-2">
                         {job.skills.map((skill, index) => (
-                          <Badge key={index} variant="secondary" className="px-3 py-1">
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="px-3 py-1"
+                          >
                             {skill}
                           </Badge>
                         ))}
@@ -352,9 +387,12 @@ export default function JobDetailsPage() {
                   {hasApplied ? (
                     <div className="text-center py-4">
                       <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
-                      <h3 className="font-semibold text-green-900 mb-2">Application Submitted</h3>
+                      <h3 className="font-semibold text-green-900 mb-2">
+                        Application Submitted
+                      </h3>
                       <p className="text-sm text-green-700">
-                        You have already applied to this position. Check your applications page for updates.
+                        You have already applied to this position. Check your
+                        applications page for updates.
                       </p>
                       <Button
                         variant="outline"
@@ -367,14 +405,20 @@ export default function JobDetailsPage() {
                   ) : (
                     <div className="space-y-4">
                       {!showApplicationForm ? (
-                        <Button onClick={() => setShowApplicationForm(true)} className="w-full" size="lg">
+                        <Button
+                          onClick={() => setShowApplicationForm(true)}
+                          className="w-full"
+                          size="lg"
+                        >
                           <Send className="h-4 w-4 mr-2" />
                           Apply Now
                         </Button>
                       ) : (
                         <div className="space-y-4">
                           <div>
-                            <Label htmlFor="cover-letter">Cover Letter (Optional)</Label>
+                            <Label htmlFor="cover-letter">
+                              Cover Letter (Optional)
+                            </Label>
                             <Textarea
                               id="cover-letter"
                               placeholder="Tell the employer why you're interested in this role..."
@@ -388,12 +432,19 @@ export default function JobDetailsPage() {
                           <div>
                             <Label>Resume Upload</Label>
                             <div className="mt-2">
-                              <ResumeUpload onUploadComplete={setResumeData} existingData={resumeData} />
+                              <ResumeUpload
+                                onUploadComplete={setResumeData}
+                                existingData={resumeData}
+                              />
                             </div>
                           </div>
 
                           <div className="flex gap-2">
-                            <Button onClick={handleApply} disabled={applying || !resumeData} className="flex-1">
+                            <Button
+                              onClick={handleApply}
+                              disabled={applying || !resumeData}
+                              className="flex-1"
+                            >
                               {applying ? (
                                 <>
                                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -406,7 +457,11 @@ export default function JobDetailsPage() {
                                 </>
                               )}
                             </Button>
-                            <Button variant="outline" onClick={() => setShowApplicationForm(false)} disabled={applying}>
+                            <Button
+                              variant="outline"
+                              onClick={() => setShowApplicationForm(false)}
+                              disabled={applying}
+                            >
                               Cancel
                             </Button>
                           </div>
@@ -429,8 +484,14 @@ export default function JobDetailsPage() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Overall Match</span>
-                        <span className={`px-2 py-1 rounded text-sm font-medium ${getScoreColor(job.matchScore)}`}>
+                        <span className="text-sm text-gray-600">
+                          Overall Match
+                        </span>
+                        <span
+                          className={`px-2 py-1 rounded text-sm font-medium ${getScoreColor(
+                            job.matchScore
+                          )}`}
+                        >
                           {job.matchScore}%
                         </span>
                       </div>
@@ -441,8 +502,9 @@ export default function JobDetailsPage() {
                         ></div>
                       </div>
                       <p className="text-xs text-gray-600">
-                        This score is based on your skills, experience, and the job requirements. Upload your resume to
-                        get a more accurate match score.
+                        This score is based on your skills, experience, and the
+                        job requirements. Upload your resume to get a more
+                        accurate match score.
                       </p>
                     </div>
                   </CardContent>
@@ -465,11 +527,15 @@ export default function JobDetailsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Briefcase className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm capitalize">{job.type} Position</span>
+                      <span className="text-sm capitalize">
+                        {job.type} Position
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm">Posted {formatDate(job.createdAt)}</span>
+                      <span className="text-sm">
+                        Posted {formatDate(job.createdAt)}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -479,5 +545,5 @@ export default function JobDetailsPage() {
         </div>
       </div>
     </ProtectedRoute>
-  )
+  );
 }

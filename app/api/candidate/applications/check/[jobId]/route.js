@@ -1,36 +1,34 @@
-import { NextResponse } from "next/server"
-import connectDB from "@/lib/mongoose"
-import Application from "@/models/Application"
-import jwt from "jsonwebtoken"
+import { NextResponse } from "next/server";
+import connectDB from "@/lib/mongoose";
+import Application from "@/models/Application";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-function verifyToken(request) {
-  const authHeader = request.headers.get("authorization")
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null
-  }
-
+async function verifyToken(request) {
   try {
-    const token = authHeader.substring(7)
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "your-secret-key")
-    return decoded
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return null;
+    }
+    return session.user;
   } catch (error) {
-    return null
+    return null;
   }
 }
 
 export async function GET(request, { params }) {
-  const user = verifyToken(request)
+  const user = await verifyToken(request);
   if (!user || user.role !== "candidate") {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    await connectDB()
+    await connectDB();
 
     const application = await Application.findOne({
-      candidateId: user.userId,
+      candidateId: user.id,
       jobId: params.jobId,
-    }).lean()
+    }).lean();
 
     return NextResponse.json({
       hasApplied: !!application,
@@ -41,9 +39,12 @@ export async function GET(request, { params }) {
             _id: undefined,
           }
         : null,
-    })
+    });
   } catch (error) {
-    console.error("Error checking application status:", error)
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+    console.error("Error checking application status:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

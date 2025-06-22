@@ -1,22 +1,28 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Upload, FileText, Loader2, CheckCircle } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Upload, FileText, Loader2, CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export function ResumeUpload({ onUploadComplete, existingData = null }) {
-  const [isUploading, setIsUploading] = useState(false)
-  const [dragActive, setDragActive] = useState(false)
-  const [uploadedData, setUploadedData] = useState(existingData)
-  const { toast } = useToast()
+  const [isUploading, setIsUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedData, setUploadedData] = useState(existingData);
+  const { toast } = useToast();
 
   const handleFileUpload = async (files) => {
-    if (!files || files.length === 0) return
+    if (!files || files.length === 0) return;
 
-    const file = files[0]
+    const file = files[0];
 
     // Check file type
     if (!file.type.includes("pdf") && !file.type.includes("document")) {
@@ -24,8 +30,8 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
         title: "Invalid file type",
         description: "Please upload a PDF or Word document.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Check file size (10MB limit)
@@ -34,15 +40,15 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
         title: "File too large",
         description: "Please upload a file smaller than 10MB.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsUploading(true)
+    setIsUploading(true);
 
     try {
-      const formData = new FormData()
-      formData.append("resume", file)
+      const formData = new FormData();
+      formData.append("resume", file);
 
       const response = await fetch("/api/resume/analyze", {
         method: "POST",
@@ -50,61 +56,61 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
           Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
         },
         body: formData,
-      })
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setUploadedData(data)
-        onUploadComplete(data)
+        const data = await response.json();
+        setUploadedData(data);
+        onUploadComplete(data);
         toast({
           title: "Resume processed",
           description: "Your resume has been analyzed successfully.",
-        })
+        });
       } else {
-        const error = await response.json()
-        throw new Error(error.message || "Upload failed")
+        const error = await response.json();
+        throw new Error(error.message || "Upload failed");
       }
     } catch (error) {
       toast({
         title: "Upload failed",
-        description: error instanceof Error ? error.message : "Failed to process resume. Please try again.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to process resume. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   const handleDrag = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault();
+    e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
+      setDragActive(true);
     } else if (e.type === "dragleave") {
-      setDragActive(false)
+      setDragActive(false);
     }
-  }
+  };
 
   const handleDrop = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files)
+      handleFileUpload(e.dataTransfer.files);
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            Resume Upload
-          </CardTitle>
           <CardDescription>
-            Upload your resume in PDF or Word format. Our AI will extract your information automatically.
+            Upload your resume in PDF or Word format. Our AI will extract your
+            information automatically.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -113,8 +119,8 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
               dragActive
                 ? "border-primary bg-primary/5"
                 : uploadedData
-                  ? "border-green-300 bg-green-50"
-                  : "border-gray-300 hover:border-gray-400"
+                ? "border-green-300 bg-green-50"
+                : "border-gray-300 hover:border-gray-400"
             }`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -132,13 +138,20 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
                   <CheckCircle className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-green-900">Resume processed successfully!</p>
+                  <p className="text-sm font-medium text-green-900">
+                    Resume processed successfully!
+                  </p>
                   <p className="text-xs text-green-700 mt-1">
-                    {uploadedData.personalInfo?.name && `Name: ${uploadedData.personalInfo.name}`}
-                    {uploadedData.skills?.length > 0 && ` • ${uploadedData.skills.length} skills detected`}
+                    {uploadedData.personalInfo?.name &&
+                      `Name: ${uploadedData.personalInfo.name}`}
+                    {uploadedData.skills?.length > 0 &&
+                      ` • ${uploadedData.skills.length} skills detected`}
                   </p>
                 </div>
-                <Label htmlFor="file-upload-replace" className="text-primary cursor-pointer hover:underline text-sm">
+                <Label
+                  htmlFor="file-upload-replace"
+                  className="text-primary cursor-pointer hover:underline text-sm"
+                >
                   Upload different resume
                 </Label>
                 <Input
@@ -157,11 +170,16 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
                 <div>
                   <p className="text-sm font-medium text-gray-900">
                     Drop your resume here, or{" "}
-                    <Label htmlFor="file-upload" className="text-primary cursor-pointer hover:underline">
+                    <Label
+                      htmlFor="file-upload"
+                      className="text-primary cursor-pointer hover:underline"
+                    >
                       browse
                     </Label>
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX up to 10MB</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    PDF, DOC, DOCX up to 10MB
+                  </p>
                 </div>
                 <Input
                   id="file-upload"
@@ -181,8 +199,9 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
               <div className="text-sm">
                 <p className="font-medium text-blue-900">AI-Powered Analysis</p>
                 <p className="text-blue-700 mt-1">
-                  Our AI will automatically extract your personal information, skills, work experience, and education to
-                  create a comprehensive profile for job matching.
+                  Our AI will automatically extract your personal information,
+                  skills, work experience, and education to create a
+                  comprehensive profile for job matching.
                 </p>
               </div>
             </div>
@@ -195,31 +214,39 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Extracted Information</CardTitle>
-            <CardDescription>Review the information extracted from your resume</CardDescription>
+            <CardDescription>
+              Review the information extracted from your resume
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {uploadedData.personalInfo && (
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Personal Information</h4>
+                <h4 className="font-medium text-gray-900 mb-2">
+                  Personal Information
+                </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                   {uploadedData.personalInfo.name && (
                     <p>
-                      <span className="font-medium">Name:</span> {uploadedData.personalInfo.name}
+                      <span className="font-medium">Name:</span>{" "}
+                      {uploadedData.personalInfo.name}
                     </p>
                   )}
                   {uploadedData.personalInfo.email && (
                     <p>
-                      <span className="font-medium">Email:</span> {uploadedData.personalInfo.email}
+                      <span className="font-medium">Email:</span>{" "}
+                      {uploadedData.personalInfo.email}
                     </p>
                   )}
                   {uploadedData.personalInfo.phone && (
                     <p>
-                      <span className="font-medium">Phone:</span> {uploadedData.personalInfo.phone}
+                      <span className="font-medium">Phone:</span>{" "}
+                      {uploadedData.personalInfo.phone}
                     </p>
                   )}
                   {uploadedData.personalInfo.location && (
                     <p>
-                      <span className="font-medium">Location:</span> {uploadedData.personalInfo.location}
+                      <span className="font-medium">Location:</span>{" "}
+                      {uploadedData.personalInfo.location}
                     </p>
                   )}
                 </div>
@@ -228,10 +255,15 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
 
             {uploadedData.skills && uploadedData.skills.length > 0 && (
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Skills ({uploadedData.skills.length})</h4>
+                <h4 className="font-medium text-gray-900 mb-2">
+                  Skills ({uploadedData.skills.length})
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {uploadedData.skills.slice(0, 10).map((skill, index) => (
-                    <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-md">
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-md"
+                    >
                       {skill}
                     </span>
                   ))}
@@ -248,7 +280,8 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">Experience</h4>
                 <p className="text-sm text-gray-600">
-                  {uploadedData.yearsOfExperience} years • {uploadedData.seniorityLevel || "Mid"} level
+                  {uploadedData.yearsOfExperience} years •{" "}
+                  {uploadedData.seniorityLevel || "Mid"} level
                 </p>
               </div>
             )}
@@ -256,5 +289,5 @@ export function ResumeUpload({ onUploadComplete, existingData = null }) {
         </Card>
       )}
     </div>
-  )
+  );
 }

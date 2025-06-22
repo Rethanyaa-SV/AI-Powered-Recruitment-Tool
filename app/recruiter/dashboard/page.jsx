@@ -1,13 +1,28 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ProtectedRoute } from "@/components/protected-route"
-import { AdaptiveNavbar } from "@/components/adaptive-navbar"
-import { Briefcase, Users, FileText, Clock, CheckCircle, Plus, Eye, Star } from "lucide-react"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ProtectedRoute } from "@/components/protected-route";
+import { AdaptiveNavbar } from "@/components/adaptive-navbar";
+import {
+  Briefcase,
+  Users,
+  FileText,
+  Clock,
+  CheckCircle,
+  Plus,
+  Eye,
+  Star,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function RecruiterDashboard() {
   const [stats, setStats] = useState({
@@ -17,69 +32,78 @@ export default function RecruiterDashboard() {
     pendingApplications: 0,
     acceptedApplications: 0,
     rejectedApplications: 0,
-  })
-  const [recentApplications, setRecentApplications] = useState([])
-  const [loading, setLoading] = useState(true)
+  });
+  const [recentApplications, setRecentApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
+    fetchDashboardData();
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
-      const token = localStorage.getItem("auth-token")
+      const token = localStorage.getItem("auth-token");
 
       // Fetch jobs
-      const jobsResponse = await fetch("/api/recruiter/jobs", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const jobs = jobsResponse.ok ? await jobsResponse.json() : []
+      const jobsResponse = await fetch("/api/recruiter/jobs");
+      const jobs = jobsResponse.ok ? await jobsResponse.json() : [];
 
       // Fetch applications
-      const applicationsResponse = await fetch("/api/recruiter/applications", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const applications = applicationsResponse.ok ? await applicationsResponse.json() : []
+      const applicationsResponse = await fetch("/api/recruiter/applications");
+
+      const applications = applicationsResponse.ok
+        ? await applicationsResponse.json()
+        : [];
+
+      console.log(applications);
 
       // Calculate stats
       setStats({
         totalJobs: jobs.length,
         activeJobs: jobs.filter((job) => job.status === "active").length,
         totalApplications: applications.length,
-        pendingApplications: applications.filter((app) => app.status === "pending").length,
-        acceptedApplications: applications.filter((app) => app.status === "accepted").length,
-        rejectedApplications: applications.filter((app) => app.status === "rejected").length,
-      })
+        pendingApplications: applications.filter(
+          (app) => app.status === "pending"
+        ).length,
+        acceptedApplications: applications.filter(
+          (app) => app.status === "accepted"
+        ).length,
+        rejectedApplications: applications.filter(
+          (app) => app.status === "rejected"
+        ).length,
+      });
 
       // Set recent applications (top 5)
-      setRecentApplications(applications.slice(0, 5))
+      setRecentApplications(applications.slice(0, 5));
     } catch (error) {
-      console.error("Error fetching dashboard data:", error)
+      console.error("Error fetching dashboard data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "reviewed":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "accepted":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "rejected":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getScoreColor = (score) => {
-    if (score >= 80) return "text-green-600"
-    if (score >= 60) return "text-yellow-600"
-    return "text-red-600"
-  }
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  console.log(stats);
 
   if (loading) {
     return (
@@ -101,7 +125,7 @@ export default function RecruiterDashboard() {
           </div>
         </div>
       </ProtectedRoute>
-    )
+    );
   }
 
   return (
@@ -111,42 +135,62 @@ export default function RecruiterDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Recruiter Dashboard</h1>
-            <p className="text-gray-600">Manage your job postings and review applications</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Recruiter Dashboard
+            </h1>
+            <p className="text-gray-600">
+              Manage your job postings and review applications
+            </p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Active Jobs
+                </CardTitle>
                 <Briefcase className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.activeJobs}</div>
-                <p className="text-xs text-muted-foreground">{stats.totalJobs} total jobs</p>
+                <p className="text-xs text-muted-foreground">
+                  {stats.totalJobs} total jobs
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Applications
+                </CardTitle>
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalApplications}</div>
-                <p className="text-xs text-muted-foreground">All time applications</p>
+                <div className="text-2xl font-bold">
+                  {stats.totalApplications}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  All time applications
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Pending Review
+                </CardTitle>
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.pendingApplications}</div>
-                <p className="text-xs text-muted-foreground">Need your attention</p>
+                <div className="text-2xl font-bold">
+                  {stats.pendingApplications}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Need your attention
+                </p>
               </CardContent>
             </Card>
 
@@ -156,8 +200,12 @@ export default function RecruiterDashboard() {
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.acceptedApplications}</div>
-                <p className="text-xs text-muted-foreground">Successful hires</p>
+                <div className="text-2xl font-bold">
+                  {stats.acceptedApplications}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Successful hires
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -195,15 +243,20 @@ export default function RecruiterDashboard() {
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Recent Applications</CardTitle>
-                <CardDescription>Latest candidate applications with AI scores</CardDescription>
+                <CardDescription>
+                  Latest candidate applications with AI scores
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {recentApplications.length === 0 ? (
                   <div className="text-center py-8">
                     <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Yet</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No Applications Yet
+                    </h3>
                     <p className="text-gray-600 mb-4">
-                      Applications will appear here once candidates start applying to your jobs.
+                      Applications will appear here once candidates start
+                      applying to your jobs.
                     </p>
                     <Link href="/recruiter/jobs">
                       <Button>
@@ -221,22 +274,34 @@ export default function RecruiterDashboard() {
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-1">
-                            <h4 className="font-medium">{application.candidateName}</h4>
+                            <h4 className="font-medium">
+                              {application.candidateName}
+                            </h4>
                             {application.aiAssessment?.overallScore && (
                               <Badge
                                 variant="outline"
-                                className={`${getScoreColor(application.aiAssessment.overallScore)} border-current`}
+                                className={`${getScoreColor(
+                                  application.aiAssessment.overallScore
+                                )} border-current`}
                               >
                                 <Star className="h-3 w-3 mr-1" />
                                 {application.aiAssessment.overallScore}%
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">Applied for {application.jobTitle}</p>
+                          <p className="text-sm text-gray-600 mb-2">
+                            Applied for {application.jobTitle}
+                          </p>
                           <div className="flex items-center gap-2">
-                            <Badge className={getStatusColor(application.status)}>{application.status}</Badge>
+                            <Badge
+                              className={getStatusColor(application.status)}
+                            >
+                              {application.status}
+                            </Badge>
                             <span className="text-xs text-gray-500">
-                              {new Date(application.appliedAt).toLocaleDateString()}
+                              {new Date(
+                                application.appliedAt
+                              ).toLocaleDateString()}
                             </span>
                           </div>
                         </div>
@@ -263,14 +328,20 @@ export default function RecruiterDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Hiring Performance</CardTitle>
-              <CardDescription>Overview of your recruitment metrics</CardDescription>
+              <CardDescription>
+                Overview of your recruitment metrics
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-green-600 mb-2">
                     {stats.totalApplications > 0
-                      ? Math.round((stats.acceptedApplications / stats.totalApplications) * 100)
+                      ? Math.round(
+                          (stats.acceptedApplications /
+                            stats.totalApplications) *
+                            100
+                        )
                       : 0}
                     %
                   </div>
@@ -278,13 +349,21 @@ export default function RecruiterDashboard() {
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {stats.activeJobs > 0 ? Math.round(stats.totalApplications / stats.activeJobs) : 0}
+                    {stats.activeJobs > 0
+                      ? Math.round(stats.totalApplications / stats.activeJobs)
+                      : 0}
                   </div>
-                  <p className="text-sm text-gray-600">Avg Applications per Job</p>
+                  <p className="text-sm text-gray-600">
+                    Avg Applications per Job
+                  </p>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-purple-600 mb-2">
-                    {recentApplications.filter((app) => app.aiAssessment?.overallScore >= 80).length}
+                    {
+                      recentApplications.filter(
+                        (app) => app.aiAssessment?.overallScore >= 80
+                      ).length
+                    }
                   </div>
                   <p className="text-sm text-gray-600">High-Match Candidates</p>
                 </div>
@@ -294,5 +373,5 @@ export default function RecruiterDashboard() {
         </div>
       </div>
     </ProtectedRoute>
-  )
+  );
 }
