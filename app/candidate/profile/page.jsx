@@ -7,16 +7,16 @@ export default async function ProfilePage() {
   const user = await getCurrentUser();
 
   const initialData = {
-    name: user.name || "",
-    email: user.email || "",
-    phone: user.profile?.phone || "",
-    location: user.profile?.location || "",
-    summary: user.profile?.bio || "",
-    experience: user.profile?.experience || "",
-    education: user.profile?.education || "",
-    yearsOfExperience: user.profile?.yearsOfExperience || "",
-    seniorityLevel: user.profile?.seniorityLevel || "",
-    skills: user.profile?.skills || [],
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.profile?.phone || "",
+    location: user?.profile?.location || "",
+    summary: user?.profile?.bio || "",
+    experience: user?.profile?.experience || "",
+    education: user?.profile?.education || "",
+    yearsOfExperience: user?.profile?.yearsOfExperience || "",
+    seniorityLevel: user?.profile?.seniorityLevel || "",
+    skills: user?.profile?.skills || [],
   };
 
   return (
