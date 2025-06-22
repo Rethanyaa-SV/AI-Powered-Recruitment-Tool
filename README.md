@@ -2,6 +2,11 @@
 
 A streamlined web application that helps recruiters manage job postings and evaluate candidates using AI-assisted matching.
 
+🎥 **[Video Demo](https://drive.google.com/file/d/1fwmtKvvFgvovsG_89pyyryRenEEIc4_P/view?usp=sharing)**
+
+🌐 **[Live Project]([https://ai-powered-recruitment-tool-tylm.vercel.app/])**
+
+
 ## Features
 
 ### 🔐 Authentication
@@ -18,12 +23,12 @@ A streamlined web application that helps recruiters manage job postings and eval
 ### 👥 Candidate Processing
 - Upload resume files (PDF/DOCX)
 - AI-powered text extraction from resumes
-- Automatic extraction of skills, experience, and education
+- Automatic extraction of skills and experience
 - Candidate profile storage and management
 
 ### 🤖 AI Matching
 - Intelligent candidate-to-job matching based on skills and experience
-- Advanced scoring algorithm with exact and partial skill matching
+- Scoring algorithm with exact and partial skill matching
 - Experience level matching
 - Sorted results by match score
 - Visual match score indicators
@@ -37,9 +42,7 @@ A streamlined web application that helps recruiters manage job postings and eval
 ## Technology Stack
 
 ### Frontend
-- **React 18** with functional components and hooks
 - **Next.js 14** with App Router
-- **TypeScript** for type safety
 - **Tailwind CSS** for styling
 - **shadcn/ui** component library
 - **Lucide React** for icons
@@ -222,6 +225,4 @@ Final Score = Base Score + Experience Bonus (capped at 100%)
 4. Add tests if applicable
 5. Submit a pull request
 
-## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
