@@ -2,10 +2,9 @@
 
 A streamlined web application that helps recruiters manage job postings and evaluate candidates using AI-assisted matching.
 
-🎥 **[Video Demo](https://drive.google.com/file/d/1fwmtKvvFgvovsG_89pyyryRenEEIc4_P/view?usp=sharing)**
+🎥 **[Video Demo](https://drive.google.com/file/d/1fwmtKvvFgvovsG_89pyyryRenEEIc4_P/view?usp=sharing)**  
 
-🌐 **[Live Project]([https://ai-powered-recruitment-tool-tylm.vercel.app/])**
-
+🌐 **[Live Project](https://ai-powered-recruitment-tool-tylm.vercel.app/)**  
 
 ## Features
 
